@@ -18,46 +18,46 @@ module Devise #:nodoc:
         def authenticate!
           klass = mapping.to
           raise StandardError, "RPXNow API key is not defined, please see the documentation of RPXNow gem to setup it." unless RPXNow.api_key.present?
-            
+
           rpx_data = (RPXNow.user_data(params[:token], :extended => klass.rpx_extended_user_data, :additional => klass.rpx_additional_user_data) rescue nil)
           fail!(:rpx_invalid) and return unless rpx_data
-            
+
           if user = klass.authenticate_with_rpx(rpx_data)
             user.on_before_rpx_success(rpx_data)
             success!(user) and return
           end
-          
+
           begin
             fail!(:rpx_invalid) and return unless klass.rpx_auto_create_account?
-            
+
             user = klass.new
             user.store_rpx_credentials!(rpx_data)
             user.on_before_rpx_auto_create(rpx_data)
-            
-			# TODO: create a random password here and email the user if we can so that we can check the validations
-			# if the user doesn't have an email, set it to none@none.none and blank the password and salt
+
+            # TODO: create a random password here and email the user if we can so that we can check the validations
+            # if the user doesn't have an email, set it to none@none.none and blank the password and salt
             user.save(:validate => false)
-			i = Identity.new(:identifier => rpx_data[:identifer])
-			i.save! if i.save # if we got an error with this, it's fine; we can work through it.
-			user.on_before_rpx_success(rpx_data)
+            i = Identity.new(:identifier => rpx_data[:identifer])
+            i.save! if i.save # if we got an error with this, it's fine; we can work through it.
+            user.on_before_rpx_success(rpx_data)
             success!(user) and return
-            
+
           rescue
             fail!(:email_taken) and return
           end
         end
-        
-        protected
-          def valid_controller?
-            params[:controller].to_s =~ /sessions/
-          end
 
-          def valid_params?
-            params[:token].present?
-          end
+        protected
+        def valid_controller?
+          params[:controller].to_s =~ /sessions/
+        end
+
+        def valid_params?
+          params[:token].present?
+        end
 
       end
-    end
-  end
+end
+end
 end
 

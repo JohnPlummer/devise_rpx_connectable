@@ -6,7 +6,7 @@ module Devise #:nodoc:
     # RPX view helpers to easily add the link to the RPX connection popup and also the necessary JS code.
     #
     module Helpers
-      
+
       # Creates the link to the RPX connection popup.
       # If you create a link without putting the JS code, the popup will load in a new page.
       # By default the RPX link will be linked to the RPX application name you defined in the configuration.
@@ -18,8 +18,8 @@ module Devise #:nodoc:
       #
       def link_to_rpx(link_text, link_url, options={})
         options = { :unobtrusive => true }.merge(options)
-    		token_url = build_token_url(link_url)
-    		RPXNow.popup_code(link_text, rpx_application_name_from_options(options), token_url, options).html_safe
+        token_url = build_token_url(link_url)
+        RPXNow.popup_code(link_text, rpx_application_name_from_options(options), token_url, options).html_safe
       end
 
       # Embeds the RPX connection iframe in your page.
@@ -46,22 +46,22 @@ module Devise #:nodoc:
       # </html>
       #
       def javascript_include_rpx(link_url, options={})
-    		token_url = build_token_url(link_url)
+        token_url = build_token_url(link_url)
         RPXNow.popup_source(rpx_application_name_from_options(options), token_url, options).html_safe
       end
 
       protected
-        def rpx_application_name_from_options(options)
-          options[:application_name] ? options.delete(:application_name) : ::Devise.rpx_application_name
-        end
-        
-        def build_token_url(return_url)
-          token = return_url.include?("?") ? "&" : "?"
-          "#{return_url}#{token}authenticity_token=#{Rack::Utils.escape(form_authenticity_token)}"
-        end
-      
+      def rpx_application_name_from_options(options)
+        options[:application_name] ? options.delete(:application_name) : ::Devise.rpx_application_name
+      end
+
+      def build_token_url(return_url)
+        token = return_url.include?("?") ? "&" : "?"
+        "#{return_url}#{token}authenticity_token=#{Rack::Utils.escape(form_authenticity_token)}"
+      end
+
     end
-  end
+end
 end
 
 ::ActionView::Base.send :include, Devise::RpxConnectable::Helpers

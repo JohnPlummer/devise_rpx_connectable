@@ -26,8 +26,8 @@ module Devise #:nodoc:
 
       def self.included(base) #:nodoc:
         base.class_eval do
-          extend ClassMethods
-        end
+        extend ClassMethods
+      end
       end
 
       # Store RPX account/session credentials.
@@ -77,7 +77,7 @@ module Devise #:nodoc:
       def on_before_rpx_success(rpx_user)
         self.send(:before_rpx_success, rpx_user) if self.respond_to?(:before_rpx_success)
       end
-      
+
       # Hook that gets called before the auto creation of the user.
       # Therefore, this hook is only called when rpx_auto_create_account config option is enabled.
       # Useful for fetching additional user info (etc.) from RPX.
@@ -117,65 +117,65 @@ module Devise #:nodoc:
         #   end
         #
         ::Devise::Models.config(self,
-          :rpx_identifier_field,
-          :rpx_auto_create_account,
-          :rpx_extended_user_data,
-          :rpx_additional_user_data
-        )
+                                :rpx_identifier_field,
+                                :rpx_auto_create_account,
+                                :rpx_extended_user_data,
+                                :rpx_additional_user_data
+                               )
 
-        # Alias don't work for some reason, so...a more Ruby-ish alias
-        # for +rpx_auto_create_account+.
-        #
-        def rpx_auto_create_account?
-          self.rpx_auto_create_account
-        end
+                               # Alias don't work for some reason, so...a more Ruby-ish alias
+                               # for +rpx_auto_create_account+.
+                               #
+                               def rpx_auto_create_account?
+                                 self.rpx_auto_create_account
+                               end
 
-        # Authenticate a user based on RPX Identifier.
-        #
-        def authenticate_with_rpx(attributes = {})
-          begin
-            if attributes[:identifier].present?
-              user = self.find_for_rpx(attributes[:identifier])
-            end
-              
-            if !user and attributes[:email]
-              if user = self.find_by_email(attributes[:email])
-				user.identities.new(:identifier => attributes[:identifier]) #build_identity?
-				user.save!
-			  end
-            end
-            
-            return user
-            
-          rescue
-            raise StandardError, "Error in authenticate_with_rpx() -> #{$!}"
-          end
-        end
+                               # Authenticate a user based on RPX Identifier.
+                               #
+                               def authenticate_with_rpx(attributes = {})
+                                 begin
+                                   if attributes[:identifier].present?
+                                     user = self.find_for_rpx(attributes[:identifier])
+                                   end
 
-        protected
+                                   if !user and attributes[:email]
+                                     if user = self.find_by_email(attributes[:email])
+                                       user.identities.new(:identifier => attributes[:identifier]) #build_identity?
+                                       user.save!
+                                     end
+                                   end
 
-        # Find first record based on conditions given (RPX identifier).
-        # Overwrite to add customized conditions, create a join, or maybe use a
-        # namedscope to filter records while authenticating.
-        #
-        def find_for_rpx(identifier)
-          #self.first(:conditions =>  { rpx_identifier_field => identifier })
-		  @identity = Identity.first(:conditions => ["identifier = ?", identifier])
-		  if @identity
-		    return self.find @identity.user_id
-		  end
-		  return false
-        end
+                                   return user
 
-        # Contains the logic used in authentication. Overwritten by other devise modules.
-        # In the RPX connect case; nothing fancy required.
-        #
-        def valid_for_rpx(resource, attributes)
-          true
-        end
+                                 rescue
+                                   raise StandardError, "Error in authenticate_with_rpx() -> #{$!}"
+                                 end
+                               end
+
+                               protected
+
+                               # Find first record based on conditions given (RPX identifier).
+                               # Overwrite to add customized conditions, create a join, or maybe use a
+                               # namedscope to filter records while authenticating.
+                               #
+                               def find_for_rpx(identifier)
+                                 #self.first(:conditions =>  { rpx_identifier_field => identifier })
+                                 @identity = Identity.first(:conditions => ["identifier = ?", identifier])
+                                 if @identity
+                                   return self.find @identity.user_id
+                                 end
+                                 return false
+                               end
+
+                               # Contains the logic used in authentication. Overwritten by other devise modules.
+                               # In the RPX connect case; nothing fancy required.
+                               #
+                               def valid_for_rpx(resource, attributes)
+                                 true
+                               end
 
       end
 
     end
-  end
+end
 end
